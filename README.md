@@ -10,11 +10,12 @@ I will also look at making some commonly used helper/example Python files. Thing
 
 ## Python
 * Day 1: Getting to a version that runs for both parts was straight forward. I didn't try any optimization as it seemed the type of puzzle where anything would finish pretty quickly. Part 1 was 0.001 seconds and part 2 was 0.04 seconds. I should have started on-time, made a file for the day and changed variables for the day ahead of time to get the two stars faster. In a day or two, I'm sure these will not matter ;-)
-* Day 2: Part 1 was not too bad and part 2 was not terrible, but did take a bit of debugging to fix several errors. Part 2 also ran slow, but I think I will wait for the Rust version to see about making that better
-* Day 3: I completed Part 1 in reasonable time, but I got bogged down by the new logic needed and a couple bugs in part 2. I need to think about moving to more, smaller functions over getting a first answer to try. Part 1 was 3.4ms and part 2 6.0ms
+* Day 2: Part 1 was not too bad and part 2 was not terrible, but did take a bit of debugging to fix several errors. Part 2 also ran slow, but I think I will wait for the Rust version to see about making that better (tried regex with Rust instead, so still waiting on that)
+* Day 3: I completed Part 1 in reasonable time, but I got bogged down by the new logic needed and a couple bugs in part 2. I need to think about moving to more, smaller functions over getting a first answer to try. Part 1 was 3.4 ms and part 2 6.0 ms
 * Day 4: ...
 
 
 ## Rust
 * Day 1: Did you know that Rust "%" is not modulus, but remainder and can be negative? I also made part 2 in Rust more efficient, because it's Rust and that's part of the choice. Those two items made it take way longer than I though it would. Part 1 and 2 each took about 0.0003 seconds
-* Day 2: ...
+* Day 2: Figured I would try the Rust regex library for this one. Had to figure out why grouping does not work. It's because the standard Rust regex crate does not support it for speed reasons. No problem, use the fancy-regex library. It took 58 seconds for part 1 with a short regex. Part 2 only needed a small regex change to work, but was also very slow at 59 seconds. It also seemed hard to manipulate stings in the right way to get everything to work (str vs. &str vs. String vs. &String). Guess I still need more practice with this in Rust. I will leave improving the speed for later, but I'm guessing the Python approach would run OK and would respond well to a thread pool to take each range with
+* Day 3: ...
