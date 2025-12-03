@@ -11,6 +11,8 @@ I will also look at making some commonly used helper/example Python files. Thing
 ## Python
 * Day 1: Getting to a version that runs for both parts was straight forward. I didn't try any optimization as it seemed the type of puzzle where anything would finish pretty quickly. Part 1 was 0.001 seconds and part 2 was 0.04 seconds. I should have started on-time, made a file for the day and changed variables for the day ahead of time to get the two stars faster. In a day or two, I'm sure these will not matter ;-)
 * Day 2: Part 1 was not too bad and part 2 was not terrible, but did take a bit of debugging to fix several errors. Part 2 also ran slow, but I think I will wait for the Rust version to see about making that better
+* Day 3: I completed Part 1 in reasonable time, but I got bogged down by the new logic needed and a couple bugs in part 2. I need to think about moving to more, smaller functions over getting a first answer to try. Part 1 was 3.4ms and part 2 6.0ms
+* Day 4: ...
 
 
 ## Rust
