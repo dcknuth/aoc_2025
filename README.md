@@ -14,7 +14,9 @@ I will also look at making some commonly used helper/example Python files. Thing
 * Day 3: I completed Part 1 in reasonable time, but I got bogged down by the new logic needed and a couple bugs in part 2. I need to think about moving to more, smaller functions over getting a first answer to try. Part 1 was 3.4 ms and part 2 6.0 ms
 * Day 4: Some code to look around in the map, but not too bad and much could be reused for part 2. Part 1 took 11 ms and Part 2 was 190 ms
 * Day 5: First day where part 2 cannot be solved with brute force. This was also the first time I ran out of memory instead of just waiting a long time and killing off the run. I used a range collapsing approach to solve (this has worked in previous years and I suspected straight away would be needed here). Could use clean-up, but done for now. Part 1 took 5.6 ms and part 2 34.7 ms
-* Day 6: ...
+* Day 6: First part was easy, but the second part had a few formatting tricks. Errors in these needed to be debugged for a bit. Part 1 took 1.6 ms and part 2 3.7 ms
+* Day 7: Like Day 6, the first part was fine, but the second part needed an elegant solution of tracking position sums by row. Part 1 ran in 2.8 ms and part 2 took 2.4 ms
+* Day 8: ...
 
 
 ## Rust
