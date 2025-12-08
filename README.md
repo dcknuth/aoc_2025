@@ -15,8 +15,9 @@ I will also look at making some commonly used helper/example Python files. Thing
 * Day 4: Some code to look around in the map, but not too bad and much could be reused for part 2. Part 1 took 11 ms and Part 2 was 190 ms
 * Day 5: First day where part 2 cannot be solved with brute force. This was also the first time I ran out of memory instead of just waiting a long time and killing off the run. I used a range collapsing approach to solve (this has worked in previous years and I suspected straight away would be needed here). Could use clean-up, but done for now. Part 1 took 5.6 ms and part 2 34.7 ms
 * Day 6: First part was easy, but the second part had a few formatting tricks. Errors in these needed to be debugged for a bit. Part 1 took 1.6 ms and part 2 3.7 ms
-* Day 7: Like Day 6, the first part was fine, but the second part needed an elegant solution of tracking position sums by row. Part 1 ran in 2.8 ms and part 2 took 2.4 ms
-* Day 8: ...
+* Day 7: Like Day 5, the first part was fine, but the second part needed an elegant solution of tracking position sums by row. Part 1 ran in 2.8 ms and part 2 took 2.4 ms
+* Day 8: This was the first day where I thought part 1 was also tricky. I started with a set based solution, but that was falling apart a bit. I moved to a graph solution with NetworkX and that worked pretty well. For part 2, I redid a lot of part 1 and checked for full connection after adding each pair. I could have saved some time in part 2 by reusing part 1 variables, but didn't want to move the scope of the variables, just getting the stars. I will probably see if I can reuse on the Rust version, but that will mean a apples to oranges comparison of run times. Part 1 took 0.72 seconds and part 2 was 4.4 seconds, so run times are increasing
+* Day 9: ...
 
 
 ## Rust
@@ -24,6 +25,7 @@ I will also look at making some commonly used helper/example Python files. Thing
 * Day 2: Figured I would try the Rust regex library for this one. Had to figure out why grouping does not work. It's because the standard Rust regex crate does not support it for speed reasons. No problem, use the fancy-regex library. It took 58 seconds for part 1 with a short regex. Part 2 only needed a small regex change to work, but was also very slow at 59 seconds. It also seemed hard to manipulate stings in the right way to get everything to work (str vs. &str vs. String vs. &String). Guess I still need more practice with this in Rust. I will leave improving the speed for later, but I'm guessing the Python approach would run OK and would respond well to a thread pool to take each range with
 * Day 3: Some frustration as I continue to get used to Rust's argument passing and ownership. Since I knew what was coming in part 2, I made a function that could take the number of batteries used as a parameter. Part 1 ran in 0.14 ms and part 2 in 0.20 ms. Since I used the same approach as with Python, probably a normal Rust speed-up factor
 * Day 4: Not too bad to move to Rust. I could have refactored part1 to serve for part2 and had less code. Part 1 took 0.23 ms and part 2 took 3.7 ms. Since this was comparable to the Python approach, Rust was ~50x faster for each part
+* Day 5: ...
 
 ## Things Learned This Year (in progress)
 * Python is slower, but so easy. Yes I know it better at this point, however I think some of the following points will lend that observation some credibility
