@@ -27,7 +27,7 @@ I will also look at making some commonly used helper/example Python files. Thing
 * Day 3: Some frustration as I continue to get used to Rust's argument passing and ownership. Since I knew what was coming in part 2, I made a function that could take the number of batteries used as a parameter. Part 1 ran in 0.14 ms and part 2 in 0.20 ms. Since I used the same approach as with Python, probably a normal Rust speed-up factor
 * Day 4: Not too bad to move to Rust. I could have refactored part1 to serve for part2 and had less code. Part 1 took 0.23 ms and part 2 took 3.7 ms. Since this was comparable to the Python approach, Rust was ~50x faster for each part
 * Day 5: I looked to write a part 1 with ranges that could be reused for part 2. Again, it took some time to get this all typed correctly. Part 1 took 0.53 ms and part 2 was 200 nano seconds. So part 1 was a 10x speed-up vs. Python, but since it was also merging ranges in part 1, part 2 was a >100,000x speed-up. More fairly, a 76x speed-up overall
-* Day 6: ...
+* Day 6: I asked Copilot if parse() takes care of whitespace for you. It said yes, but actually, it does not. That combined with the usual argument passing and ownership learning made the second part take a while. Part 1 ran in 0.11 ms and part 2 was 0.58 ms. If I pass back through, I might be able to remove some clone()s in part 2 
 
 ## Things Learned This Year (in progress)
 * Python is slower, but so easy. Yes I know it better at this point, however I think some of the following points will lend that observation some credibility
