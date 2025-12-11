@@ -18,7 +18,9 @@ I will also look at making some commonly used helper/example Python files. Thing
 * Day 7: Like Day 5, the first part was fine, but the second part needed an elegant solution of tracking position sums by row. Part 1 ran in 2.8 ms and part 2 took 2.4 ms
 * Day 8: This was the first day where I thought part 1 was also tricky. I started with a set based solution, but that was falling apart a bit. I moved to a graph solution with NetworkX and that worked pretty well. For part 2, I redid a lot of part 1 and checked for full connection after adding each pair. I could have saved some time in part 2 by reusing part 1 variables, but didn't want to move the scope of the variables, just getting the stars. I will probably see if I can reuse on the Rust version, but that will mean a apples to oranges comparison of run times. Part 1 took 0.72 seconds and part 2 was 4.4 seconds, so run times are increasing
 * Day 9: Part 1 was quick to solve and run, but part 2 required some thought. First idea worked, but took a some time to run. Will save optimization ideas for the Rust implementation. Part 1 took 0.02 seconds and part 2 took 8.3 seconds
-* Day 10: ...
+* Day 10: Part 1 took 14 seconds via brute force, but worked. Part 2 has no chance with brute force so tried with an equation solver first. This started breaking just with the first set because it gave fractional presses, but had a correct answer. Will try to loop this, but I don't have much hope it will work on the full example or real input. And... it's not working. I'm pretty sure I am setting up the constraints incorrectly, but can't figure out how to fix it for the last example line.  
+I moved to using the Pulp module, but I still can't seem to figure out how to set this up correctly for each line.  
+OK, figured it out with Pulp, but this was the hardest day so far. Part 1 took 14 seconds (via brute force) and part 2 was 2.8 seconds with the Pulp module. Having a good structure, I might be able to get SciPy to work now and I hope there is a solver crate for Rust
 
 
 ## Rust
