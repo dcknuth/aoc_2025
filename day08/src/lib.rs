@@ -197,6 +197,45 @@ pub fn part2(s: &String, n: usize) -> i64 {
     dists[i].1[0] * dists[i].2[0]
 }
 
+pub fn part1_and2(s: &String, n: usize) -> (i64, i64) {
+    let boxes = load_boxes(s);
+    let dists = load_distances(boxes.clone());
+    let mut connections: HashMap<String, HashSet<String>> = HashMap::new();
+    for i in 0..n {
+        let b1_str = format!("{},{},{}",
+                                dists[i].1[0], dists[i].1[1], dists[i].1[2]);
+        let b2_str = format!("{},{},{}",
+                                dists[i].2[0], dists[i].2[1], dists[i].2[2]);
+        add_connection(&mut connections, (dists[i].0, b1_str, b2_str));
+    }
+    
+    let mut circuits = get_circuits(&connections);
+    circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+    let mut circuits = get_circuits(&connections);
+    circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+
+    let mut total = 1;
+    for i in 0..3 {
+        total *= circuits[i].len() as i64;
+    }
+
+    // going to assume that more than the number of connections made in part
+    //  1 will be needed to fully connect
+    let mut i = n-1;
+    let num_boxes = boxes.len();
+    while circuits[0].len() < num_boxes {
+        i += 1;
+        let b1_str = format!("{},{},{}",
+                                dists[i].1[0], dists[i].1[1], dists[i].1[2]);
+        let b2_str = format!("{},{},{}",
+                                dists[i].2[0], dists[i].2[1], dists[i].2[2]);
+        add_circuit(&mut circuits, &mut connections,
+                (dists[i].0, b1_str, b2_str));
+    }
+
+    (total, dists[i].1[0] * dists[i].2[0])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

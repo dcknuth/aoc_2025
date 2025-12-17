@@ -1,6 +1,6 @@
 use std::fs;
 use std::time::Instant;
-use day08::{part1, part2};
+use day08::{part1_and2};
 
 fn main() {
     let filename = "input08.txt";
@@ -8,12 +8,7 @@ fn main() {
         .expect("Could not open input file");
 
     let t0 = Instant::now();
-    let ans_p1 = part1(&s, 1000);
+    let (ans_p1, ans_p2) = part1_and2(&s, 1000);
     let duration = t0.elapsed();
-    println!("Part 1 is {ans_p1} in {:.4?}", duration);
-
-    let t0 = Instant::now();
-    let ans_p2 = part2(&s, 1000);
-    let duration = t0.elapsed();
-    println!("Part 2 is {ans_p2} in {:.4?}", duration);
+    println!("Part 1 is {ans_p1}, part 2 is {ans_p2} in {:.4?}", duration);
 }
