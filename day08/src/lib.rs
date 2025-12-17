@@ -74,6 +74,77 @@ fn get_circuits(connections: &HashMap<String, HashSet<String>>) ->
     circuits
 }
 
+fn add_circuit(circuits: &mut Vec<HashSet<String>>,
+                connections: &mut HashMap<String, HashSet<String>>,
+                dist: (f64, String, String)) {
+    // will need to know which were already in a circuit
+    let mut b1_in_circuit = false;
+    let mut b2_in_circuit = false;
+    if connections.contains_key(&dist.1) {
+        b1_in_circuit = true;
+    }
+    if connections.contains_key(&dist.2) {
+        b2_in_circuit = true;
+    }
+    
+    // update the connections
+    connections.entry(dist.1.clone()).or_insert_with(|| {
+        let mut set = HashSet::new();
+        set.insert(dist.1.clone());
+        set
+    }).insert(dist.2.clone());
+    connections.entry(dist.2.clone()).or_insert_with(|| {
+        let mut set = HashSet::new();
+        set.insert(dist.2.clone());
+        set
+    }).insert(dist.1.clone());
+    
+    // now add box1 to circuits
+    if ! b1_in_circuit && ! b2_in_circuit {
+        let circuit: HashSet<String> = connections[&dist.1].clone();
+        circuits.push(circuit);
+    } else if b1_in_circuit && ! b2_in_circuit {
+        for cur_circuit in circuits {
+            if cur_circuit.contains(&dist.1) {
+                cur_circuit.extend(connections[&dist.2].clone());
+                break;
+            }
+        }
+    } else if b1_in_circuit && b2_in_circuit {
+        for (i, cur_circuit) in circuits.iter().enumerate() {
+            if cur_circuit.contains(&dist.1) {
+                if cur_circuit.contains(&dist.2) {
+                    break; // both boxes already in circuit
+                }
+                let mut circuit: HashSet<String> = cur_circuit.clone();
+                for (j, to_circuit) in circuits.iter().enumerate() {
+                    if to_circuit.contains(&dist.2) {
+                        circuit.extend(to_circuit.clone());
+                        if j > i {
+                            circuits.remove(j);
+                            circuits.remove(i);
+                        } else {
+                            circuits.remove(i);
+                            circuits.remove(j);
+                        }
+                        circuits.push(circuit);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    } else {
+        // b2 in a circuit, but not b1
+        for cur_circuit in circuits {
+            if cur_circuit.contains(&dist.2) {
+                cur_circuit.extend(connections[&dist.1].clone());
+                break;
+            }
+        }
+    }
+}
+
 pub fn part1(s: &String, n: usize) -> i64 {
     let boxes = load_boxes(s);
     let dists = load_distances(boxes);
@@ -119,9 +190,8 @@ pub fn part2(s: &String, n: usize) -> i64 {
                                 dists[i].1[0], dists[i].1[1], dists[i].1[2]);
         let b2_str = format!("{},{},{}",
                                 dists[i].2[0], dists[i].2[1], dists[i].2[2]);
-        add_connection(&mut connections, (dists[i].0, b1_str, b2_str));
-        // this will be slow TODO, make an add one to replace get_circuits
-        circuits = get_circuits(&connections);
+        add_circuit(&mut circuits, &mut connections,
+                (dists[i].0, b1_str, b2_str));
     }
 
     dists[i].1[0] * dists[i].2[0]

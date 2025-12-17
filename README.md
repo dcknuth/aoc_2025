@@ -36,6 +36,8 @@ Amazingly, this worked and since part two is having all the other stars, I'm don
 * Day 7: I think I did this a little cleaner than the Python version. Part 1 took 0.39 ms and part 2 took 0.42 ms. About 5x faster than Python. This might be a place I could try converting from for loops to in-line iterators to see if it makes a speed difference
 * Day 8: Going to try the set solution that was not working in Python. This way I will not be using a graph/networking crate.  
 **Version 1:** I just got things running and used a wasteful method of completely rebuilding the circuits each time I added a added a connection. It worked, but was very slow for part 2. Part 1 took 0.16 seconds and part 2 was 14.2 seconds. So p1 was about 4x faster than Python and P2 was ~3x slower. I am going to do a check in here and improve this in parts
+**Version 2:** The worst thing in V1 is probably all the rework done just reusing get_circuits() from part 1. If we keep the circuits and just add each connection as it is made we should save lots of time. I am predicting more time than everything else combined (I didn't do a profile, but it seems very wasteful). This worked pretty well and put part at 0.17 seconds. In total now (part 1 and part 2) Rust is now about 15x faster
+**Version 3:** ...
 
 ## Things Learned This Year (in progress)
 * Python is slower, but so easy. Yes I know it better at this point, however I think some of the following points will lend that observation some credibility
