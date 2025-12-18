@@ -12,24 +12,24 @@ fn load_boxes(s: &String) -> Vec<(String, Vec<i64>)> {
     boxes
 }
 
-fn load_distances(boxes: &Vec<(String, Vec<i64>)>) -> Vec<(f64, &String, &String)> {
-    let mut by_dist: Vec<(f64, &String, &String)> = Vec::new();
+fn load_distances(boxes: &Vec<(String, Vec<i64>)>) -> Vec<(i64, &String, &String)> {
+    let mut by_dist: Vec<(i64, &String, &String)> = Vec::new();
     for i in 0..(boxes.len()-1) {
         for j in i+1..boxes.len() {
             let dx = boxes[j].1[0] - boxes[i].1[0];
             let dy = boxes[j].1[1] - boxes[i].1[1];
             let dz = boxes[j].1[2] - boxes[i].1[2];
-            let dist = ((dx * dx + dy * dy + dz * dz) as f64).sqrt();
+            let dist = dx * dx + dy * dy + dz * dz;
             by_dist.push((dist, &boxes[i].0, &boxes[j].0));
         }
     }
-    by_dist.sort_by(|a, b| a.0.total_cmp(&b.0));
+    by_dist.sort_unstable();
 
     by_dist
 }
 
 fn add_connection(connections: &mut HashMap<String, HashSet<String>>,
-                    dist: (f64, String, String)) {
+                    dist: (i64, String, String)) {
     // take a distance and two points and put the two points in the connections
     //  hash map. Join connections if needed
     connections.entry(dist.1.clone()).or_insert_with(|| {
@@ -79,7 +79,7 @@ fn get_circuits(connections: &HashMap<String, HashSet<String>>) ->
 
 fn add_circuit(circuits: &mut Vec<HashSet<String>>,
                 connections: &mut HashMap<String, HashSet<String>>,
-                dist: (f64, String, String)) {
+                dist: (i64, String, String)) {
     // will need to know which were already in a circuit
     let mut b1_in_circuit = false;
     let mut b2_in_circuit = false;
@@ -159,7 +159,7 @@ pub fn part1_and2(s: &String, n: usize) -> (i64, i64) {
     }
     
     let mut circuits = get_circuits(&connections);
-    circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+    circuits.sort_unstable_by(|a, b| b.len().cmp(&a.len()));
     
     let mut total = 1;
     for i in 0..3 {
@@ -208,16 +208,16 @@ mod tests {
             ("57,618,57".to_string(), vec![57,618,57]),
             ("906,360,560".to_string(), vec![906,360,560]),];
         let test_dists = vec![
-            (787.814, "162,817,812", "57,618,57"),
-            (908.784, "162,817,812", "906,360,560"),
-            (1019.987, "57,618,57", "906,360,560")
+            (620651, "162,817,812", "57,618,57"),
+            (825889, "162,817,812", "906,360,560"),
+            (1040374, "57,618,57", "906,360,560")
         ];
         let by_dist = load_distances(&test_boxes);
-        assert!((test_dists[0].0 - by_dist[0].0).abs() < 0.01);
+        assert_eq!(test_dists[0].0, by_dist[0].0);
         assert_eq!(by_dist[0].1, test_dists[0].1);
-        assert!((test_dists[1].0 - by_dist[1].0).abs() < 0.01);
+        assert_eq!(test_dists[1].0, by_dist[1].0);
         assert_eq!(by_dist[1].1, test_dists[1].1);
-        assert!((test_dists[2].0 - by_dist[2].0).abs() < 0.01);
+        assert_eq!(test_dists[2].0, by_dist[2].0);
         assert_eq!(by_dist[2].1, test_dists[2].1);
     }
 
