@@ -38,7 +38,8 @@ Amazingly, this worked and since part two is having all the other stars, I'm don
 **Version 1:** I just got things running and used a wasteful method of completely rebuilding the circuits each time I added a added a connection. It worked, but was very slow for part 2. Part 1 took 0.16 seconds and part 2 was 14.2 seconds. So p1 was about 4x faster than Python and P2 was ~3x slower. I am going to do a check in here and improve this in parts
 **Version 2:** The worst thing in V1 is probably all the rework done just reusing get_circuits() from part 1. If we keep the circuits and just add each connection as it is made we should save lots of time. I am predicting more time than everything else combined (I didn't do a profile, but it seems very wasteful). This worked pretty well and put part at 0.17 seconds. In total now (part 1 and part 2) Rust is now about 15x faster
 **Version 3:** The next easy thing to do is not to do the work from part 1 again in part 2. I usually don't try to reuse between the parts, but let's keep going until I run out of ideas or get board with day 8. This works and the whole thing now runs in just over part2's V2 time. Rust is now ~29x faster. Still, we have some extra string manipulation and a lot of clone.()s. Let's do a refactor and see if we can fix some of that
-**Version 4:** ...
+**Version 4:** Keeping the original strings saved about 10 ms, leaving total time at 167.5 ms. Got rid of one clone() and it didn't really do anything, but got rid of the one to build the list by distances between boxes and it ran about 3x faster. So I am going to do a commit so the change is visible. Total speed up over Python is at 113x
+**Version 5:** ...
 
 ## Things Learned This Year (in progress)
 * Python is slower, but so easy. Yes I know it better at this point, however I think some of the following points will lend that observation some credibility
