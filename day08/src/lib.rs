@@ -1,26 +1,27 @@
 use std::collections::{HashMap, HashSet};
 
-fn load_boxes(s: &String) -> Vec<(String, Vec<i64>)> {
-    let boxes: Vec<(String, Vec<i64>)> = s.lines()
+fn load_boxes<'a>(s: &'a str) -> Vec<(&'a str, Vec<i64>)> {
+    let boxes: Vec<(&str, Vec<i64>)> = s.lines()
         .map(|l| {
             let nums = l.split(',')
                 .map(|n| n.parse::<i64>().unwrap())
                 .collect::<Vec<i64>>();
-            (l.to_string(), nums)
+            (l, nums)
         }).collect();
 
     boxes
 }
 
-fn load_distances(boxes: &Vec<(String, Vec<i64>)>) -> Vec<(i64, &String, &String)> {
-    let mut by_dist: Vec<(i64, &String, &String)> = Vec::new();
+fn load_distances<'a>(boxes: &'a Vec<(&'a str, Vec<i64>)>)
+        -> Vec<(i64, &'a str, &'a str)> {
+    let mut by_dist: Vec<(i64, &str, &str)> = Vec::new();
     for i in 0..(boxes.len()-1) {
         for j in i+1..boxes.len() {
             let dx = boxes[j].1[0] - boxes[i].1[0];
             let dy = boxes[j].1[1] - boxes[i].1[1];
             let dz = boxes[j].1[2] - boxes[i].1[2];
             let dist = dx * dx + dy * dy + dz * dz;
-            by_dist.push((dist, &boxes[i].0, &boxes[j].0));
+            by_dist.push((dist, boxes[i].0, boxes[j].0));
         }
     }
     by_dist.sort_unstable();
@@ -28,101 +29,103 @@ fn load_distances(boxes: &Vec<(String, Vec<i64>)>) -> Vec<(i64, &String, &String
     by_dist
 }
 
-fn add_connection(connections: &mut HashMap<String, HashSet<String>>,
-                    dist: (i64, String, String)) {
+fn add_connection<'a>(connections: &mut HashMap<&'a str, HashSet<&'a str>>,
+                    dist: (i64, &'a str, &'a str)) {
     // take a distance and two points and put the two points in the connections
     //  hash map. Join connections if needed
-    connections.entry(dist.1.clone()).or_insert_with(|| {
+    connections.entry(dist.1).or_insert_with(|| {
         let mut set = HashSet::new();
-        set.insert(dist.1.clone());
+        set.insert(dist.1);
         set
-    }).insert(dist.2.clone());
-    connections.entry(dist.2.clone()).or_insert_with(|| {
+    }).insert(dist.2);
+    connections.entry(dist.2).or_insert_with(|| {
         let mut set = HashSet::new();
-        set.insert(dist.2.clone());
+        set.insert(dist.2);
         set
-    }).insert(dist.1.clone());
+    }).insert(dist.1);
 }
 
-fn get_circuits(connections: &HashMap<String, HashSet<String>>) -> 
-                Vec<HashSet<String>> {
-    let mut circuits: Vec<HashSet<String>> = Vec::new();
-    let mut in_circuit: HashSet<String> = HashSet::new();
-    for key in connections.keys() {
+fn get_circuits<'a>(connections: &HashMap<&'a str, HashSet<&'a str>>) -> 
+                Vec<HashSet<&'a str>> {
+    let mut circuits: Vec<HashSet<&str>> = Vec::new();
+    let mut in_circuit: HashSet<&str> = HashSet::new();
+    for &key in connections.keys() {
         if !in_circuit.contains(key) {
-            let mut circuit: HashSet<String> = HashSet::new();
-            let mut visited: HashSet<String> = HashSet::new();
-            let mut to_visit: Vec<String> = connections[key].iter()
-                .map(|s| s.clone()).collect();
-            circuit.extend(connections[key].clone());
-            visited.insert(key.clone());
+            let mut circuit: HashSet<&str> = HashSet::new();
+            let mut visited: HashSet<&str> = HashSet::new();
+            let mut to_visit: Vec<&str> = connections[key].iter()
+                .copied().collect();
+            circuit.extend(connections[key].iter().copied());
+            visited.insert(key);
             while to_visit.len() > 0 {
                 if let Some(cur_box) = to_visit.pop() {
-                    if !visited.contains(&cur_box) {
-                        circuit.extend(connections[&cur_box].clone());
-                        visited.insert(cur_box.clone());
-                        for neighbor in connections[&cur_box].clone() {
-                            if !visited.contains(&neighbor) {
+                    if !visited.contains(cur_box) {
+                        circuit.extend(connections[cur_box].iter().copied());
+                        visited.insert(cur_box);
+                        for &neighbor in &connections[cur_box] {
+                            if !visited.contains(neighbor) {
                                 to_visit.push(neighbor);
                             }
                         }
                     }
                 }
             }
-            circuits.push(circuit.clone());
-            in_circuit.extend(circuit.clone());
+            in_circuit.extend(circuit.iter().copied());
+            circuits.push(circuit);
         }
     }
 
     circuits
 }
 
-fn add_circuit(circuits: &mut Vec<HashSet<String>>,
-                connections: &mut HashMap<String, HashSet<String>>,
-                dist: (i64, String, String)) {
+fn add_circuit<'a>(circuits: &mut Vec<HashSet<&'a str>>,
+                connections: &mut HashMap<&'a str, HashSet<&'a str>>,
+                dist: (i64, &'a str, &'a str)) {
     // will need to know which were already in a circuit
     let mut b1_in_circuit = false;
     let mut b2_in_circuit = false;
-    if connections.contains_key(&dist.1) {
+    if connections.contains_key(dist.1) {
         b1_in_circuit = true;
     }
-    if connections.contains_key(&dist.2) {
+    if connections.contains_key(dist.2) {
         b2_in_circuit = true;
     }
     
     // update the connections
-    connections.entry(dist.1.clone()).or_insert_with(|| {
+    connections.entry(dist.1).or_insert_with(|| {
         let mut set = HashSet::new();
-        set.insert(dist.1.clone());
+        set.insert(dist.1);
         set
-    }).insert(dist.2.clone());
-    connections.entry(dist.2.clone()).or_insert_with(|| {
+    }).insert(dist.2);
+    connections.entry(dist.2).or_insert_with(|| {
         let mut set = HashSet::new();
-        set.insert(dist.2.clone());
+        set.insert(dist.2);
         set
-    }).insert(dist.1.clone());
+    }).insert(dist.1);
     
     // now add box1 to circuits
     if ! b1_in_circuit && ! b2_in_circuit {
-        let circuit: HashSet<String> = connections[&dist.1].clone();
+        let mut circuit: HashSet<&str> = HashSet::new();
+        circuit.extend(connections[dist.1].iter().copied());
         circuits.push(circuit);
     } else if b1_in_circuit && ! b2_in_circuit {
         for cur_circuit in circuits {
-            if cur_circuit.contains(&dist.1) {
-                cur_circuit.extend(connections[&dist.2].clone());
+            if cur_circuit.contains(dist.1) {
+                cur_circuit.extend(connections[dist.2].iter().copied());
                 break;
             }
         }
     } else if b1_in_circuit && b2_in_circuit {
         for (i, cur_circuit) in circuits.iter().enumerate() {
-            if cur_circuit.contains(&dist.1) {
-                if cur_circuit.contains(&dist.2) {
+            if cur_circuit.contains(dist.1) {
+                if cur_circuit.contains(dist.2) {
                     break; // both boxes already in circuit
                 }
-                let mut circuit: HashSet<String> = cur_circuit.clone();
+                let mut circuit: HashSet<&str> = HashSet::new();
+                circuit.extend(cur_circuit.iter().copied());
                 for (j, to_circuit) in circuits.iter().enumerate() {
-                    if to_circuit.contains(&dist.2) {
-                        circuit.extend(to_circuit.clone());
+                    if to_circuit.contains(dist.2) {
+                        circuit.extend(to_circuit.iter().copied());
                         if j > i {
                             circuits.remove(j);
                             circuits.remove(i);
@@ -140,22 +143,20 @@ fn add_circuit(circuits: &mut Vec<HashSet<String>>,
     } else {
         // b2 in a circuit, but not b1
         for cur_circuit in circuits {
-            if cur_circuit.contains(&dist.2) {
-                cur_circuit.extend(connections[&dist.1].clone());
+            if cur_circuit.contains(dist.2) {
+                cur_circuit.extend(connections[dist.1].iter().copied());
                 break;
             }
         }
     }
 }
 
-pub fn part1_and2(s: &String, n: usize) -> (i64, i64) {
+pub fn part1_and2(s: &str, n: usize) -> (i64, i64) {
     let boxes = load_boxes(s);
     let dists = load_distances(&boxes);
-    let mut connections: HashMap<String, HashSet<String>> = HashMap::new();
+    let mut connections: HashMap<&str, HashSet<&str>> = HashMap::new();
     for i in 0..n {
-        let b1_str = dists[i].1.clone();
-        let b2_str = dists[i].2.clone();
-        add_connection(&mut connections, (dists[i].0, b1_str, b2_str));
+        add_connection(&mut connections, dists[i]);
     }
     
     let mut circuits = get_circuits(&connections);
@@ -172,10 +173,7 @@ pub fn part1_and2(s: &String, n: usize) -> (i64, i64) {
     let num_boxes = boxes.len();
     while circuits[0].len() < num_boxes {
         i += 1;
-        let b1_str = dists[i].1.clone();
-        let b2_str = dists[i].2.clone();
-        add_circuit(&mut circuits, &mut connections,
-                (dists[i].0, b1_str, b2_str));
+        add_circuit(&mut circuits, &mut connections, dists[i]);
     }
     let x1 = dists[i].1.split(',').next()
         .unwrap().parse::<i64>().unwrap();
@@ -192,21 +190,21 @@ mod tests {
     fn test_load_boxes() {
         let s = "162,817,812
 57,618,57
-906,360,560".to_string();
-        let test_boxes: Vec<(String, Vec<i64>)> = vec![
-            ("162,817,812".to_string(), vec![162,817,812]),
-            ("57,618,57".to_string(), vec![57,618,57]),
-            ("906,360,560".to_string(), vec![906,360,560]),];
+906,360,560";
+        let test_boxes: Vec<(&str, Vec<i64>)> = vec![
+            ("162,817,812", vec![162,817,812]),
+            ("57,618,57", vec![57,618,57]),
+            ("906,360,560", vec![906,360,560]),];
         let boxes = load_boxes(&s);
         assert_eq!(boxes, test_boxes);
     }
 
     #[test]
     fn test_load_distances() {
-        let test_boxes: Vec<(String, Vec<i64>)> = vec![
-            ("162,817,812".to_string(), vec![162,817,812]),
-            ("57,618,57".to_string(), vec![57,618,57]),
-            ("906,360,560".to_string(), vec![906,360,560]),];
+        let test_boxes: Vec<(&str, Vec<i64>)> = vec![
+            ("162,817,812", vec![162,817,812]),
+            ("57,618,57", vec![57,618,57]),
+            ("906,360,560", vec![906,360,560]),];
         let test_dists = vec![
             (620651, "162,817,812", "57,618,57"),
             (825889, "162,817,812", "906,360,560"),
@@ -242,7 +240,7 @@ mod tests {
 941,993,340
 862,61,35
 984,92,344
-425,690,689".to_string();
+425,690,689";
         
         assert_eq!(part1_and2(&s, 10), (40, 25272));
     }
