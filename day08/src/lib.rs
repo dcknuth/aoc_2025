@@ -82,71 +82,74 @@ fn add_circuit<'a>(circuits: &mut Vec<HashSet<&'a str>>,
                 connections: &mut HashMap<&'a str, HashSet<&'a str>>,
                 dist: (i64, &'a str, &'a str)) {
     // will need to know which were already in a circuit
-    let mut b1_in_circuit = false;
-    let mut b2_in_circuit = false;
-    if connections.contains_key(dist.1) {
-        b1_in_circuit = true;
-    }
-    if connections.contains_key(dist.2) {
-        b2_in_circuit = true;
-    }
+    let (_, b1, b2) = dist;
+    let b1_in = connections.contains_key(b1);
+    let b2_in = connections.contains_key(b2);
     
     // update the connections
-    connections.entry(dist.1).or_insert_with(|| {
+    connections.entry(b1).or_insert_with(|| {
         let mut set = HashSet::new();
-        set.insert(dist.1);
+        set.insert(b1);
         set
-    }).insert(dist.2);
-    connections.entry(dist.2).or_insert_with(|| {
+    }).insert(b2);
+    connections.entry(b2).or_insert_with(|| {
         let mut set = HashSet::new();
-        set.insert(dist.2);
+        set.insert(b2);
         set
-    }).insert(dist.1);
+    }).insert(b1);
     
     // now add box1 to circuits
-    if ! b1_in_circuit && ! b2_in_circuit {
-        let mut circuit: HashSet<&str> = HashSet::new();
-        circuit.extend(connections[dist.1].iter().copied());
+    if !b1_in && !b2_in {
+        let circuit: HashSet<&str> = connections[b1].iter().copied().collect();
         circuits.push(circuit);
-    } else if b1_in_circuit && ! b2_in_circuit {
-        for cur_circuit in circuits {
-            if cur_circuit.contains(dist.1) {
-                cur_circuit.extend(connections[dist.2].iter().copied());
-                break;
+        return;
+    }
+    if b1_in && !b2_in {
+        for circ in circuits.iter_mut() {
+            if circ.contains(b1) {
+                circ.extend(connections[b2].iter().copied());
+                return;
             }
         }
-    } else if b1_in_circuit && b2_in_circuit {
-        for (i, cur_circuit) in circuits.iter().enumerate() {
-            if cur_circuit.contains(dist.1) {
-                if cur_circuit.contains(dist.2) {
-                    break; // both boxes already in circuit
-                }
-                let mut circuit: HashSet<&str> = HashSet::new();
-                circuit.extend(cur_circuit.iter().copied());
-                for (j, to_circuit) in circuits.iter().enumerate() {
-                    if to_circuit.contains(dist.2) {
-                        circuit.extend(to_circuit.iter().copied());
-                        if j > i {
-                            circuits.remove(j);
-                            circuits.remove(i);
-                        } else {
-                            circuits.remove(i);
-                            circuits.remove(j);
-                        }
-                        circuits.push(circuit);
-                        break;
-                    }
-                }
-                break;
+    }
+    if b2_in && !b1_in {
+        for circ in circuits.iter_mut() {
+            if circ.contains(b2) {
+                circ.extend(connections[b1].iter().copied());
+                return;
             }
         }
-    } else {
-        // b2 in a circuit, but not b1
-        for cur_circuit in circuits {
-            if cur_circuit.contains(dist.2) {
-                cur_circuit.extend(connections[dist.1].iter().copied());
-                break;
+    }
+    if b1_in && b2_in {
+        let mut i1 = None;
+        let mut i2 = None;
+        for (i, circ) in circuits.iter().enumerate() {
+            if circ.contains(b1) {
+                i1 = Some(i);
             }
+            if circ.contains(b2) {
+                i2 = Some(i)
+            }
+        }
+        match (i1, i2) {
+            (Some(i), Some(j)) if i == j => {
+                // same circuit, do nothing
+            }
+            (Some(i), Some(j)) => {
+                // merge circuits i and j
+                let mut merged = circuits[i].clone();
+                merged.extend(circuits[j].iter().copied());
+                // remove larger index first
+                if j > i {
+                    circuits.remove(j);
+                    circuits.remove(i);
+                } else {
+                    circuits.remove(i);
+                    circuits.remove(j);
+                }
+                circuits.push(merged);
+            }
+            _ => {}
         }
     }
 }
