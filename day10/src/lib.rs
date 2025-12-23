@@ -51,7 +51,22 @@ pub fn part1(s: &String) -> u64 {
     min_total as u64
 }
 
-use z3::{Optimize, SatResult, ast::Int};
+
+use z3::{Optimize, SatResult, ast::Int, ast::Bool};
+fn constraint(vars: &[Int], coeffs: &[i64],
+                    rhs: u64,) -> Bool {
+    assert_eq!(vars.len(), coeffs.len());
+    // Build sum(coeff[i] * vars[i])
+    let terms: Vec<Int> = vars.iter()
+        .zip(coeffs)
+        .map(|(v, c)| Int::mul(&[v, &Int::from_i64(*c)]))
+        .collect();
+    // Z3's add takes &[&Int], so convert
+    let term_refs: Vec<&Int> = terms.iter().collect();
+    let sum = Int::add(&term_refs);
+    sum.eq(&Int::from_u64(rhs))
+}
+
 pub fn part2(s: &String) -> u64 {
     let mut lights: Vec<Vec<bool>> = Vec::new();
     let mut buttons: Vec<Vec<Vec<usize>>> = Vec::new();
@@ -78,42 +93,43 @@ pub fn part2(s: &String) -> u64 {
     }
     
     let mut min_total = 0;
-    // just one set
-    let opt = Optimize::new();
-    let mut b_indexes: Vec<Vec<usize>> =
-        vec![vec![0; jolts[0].len()]; buttons[0].len()];
-    let mut vars: Vec<Int> = Vec::new();
-    for b in 0..buttons[0].len() {
-        for &j in &buttons[0][b] {
-            b_indexes[b][j] += 1;
+    for m in 0..jolts.len() {
+        let opt = Optimize::new();
+        let mut b_indexes: Vec<Vec<usize>> =
+            vec![vec![0; jolts[m].len()]; buttons[m].len()];
+        let mut vars: Vec<Int> = Vec::new();
+        for b in 0..buttons[m].len() {
+            for &j in &buttons[m][b] {
+                b_indexes[b][j] += 1;
+            }
+            let var = Int::new_const(format!("b{b}"));
+            opt.assert(&var.ge(0));
+            vars.push(var);
         }
-        let var = Int::new_const(format!("b{b}"));
-        opt.assert(&var.ge(0));
-        vars.push(var);
-    }
-    println!("b_indexes is:\n{b_indexes:?}");
-    let total_presses = &vars[0] + &vars[1] + &vars[2] + &vars[3] +
-                        &vars[4] + &vars[5];
-    opt.minimize(&total_presses);
-    for i in 0..jolts[0].len() {
-        let cur_total = &vars[0] * b_indexes[0][i] as i64 +
-                            &vars[1] * b_indexes[1][i] as i64 +
-                            &vars[2] * b_indexes[2][i] as i64 +
-                            &vars[3] * b_indexes[3][i] as i64 +
-                            &vars[4] * b_indexes[4][i] as i64 +
-                            &vars[5] * b_indexes[5][i] as i64;
-        opt.assert(&cur_total.eq(jolts[0][i]));
-    }
-    println!("{opt:?}");
-    if let SatResult::Sat = opt.check(&[]) {
-        println!("There is some SatResult");
-        let model = opt.get_model().unwrap();
-        println!("Model is:\n{model:?}");
-        for b in 0..buttons[0].len() {
-            let b_presses = model.eval(&vars[b], true)
-                .unwrap().as_u64().unwrap();
-            println!("{b_presses}");
-            min_total += b_presses;
+        // println!("b_indexes is:\n{b_indexes:?}");
+        let total_presses = Int::add(&vars);
+        opt.minimize(&total_presses);
+        for i in 0..jolts[m].len() {
+            let mut coeffs = vec![0; buttons[m].len()];
+            for b in 0..b_indexes.len() {
+                if b_indexes[b][i] == 1 {
+                    coeffs[b] = 1;
+                }
+            }
+            let cur_eq = constraint(&vars, &coeffs, jolts[m][i]);
+            opt.assert(&cur_eq);
+        }
+        // println!("{opt:?}");
+        if let SatResult::Sat = opt.check(&[]) {
+            // println!("There is some SatResult");
+            let model = opt.get_model().unwrap();
+            // println!("Model is:\n{model:?}");
+            for b in 0..buttons[m].len() {
+                let b_presses = model.eval(&vars[b], true)
+                    .unwrap().as_u64().unwrap();
+                // println!("{b_presses}");
+                min_total += b_presses;
+            }
         }
     }
 
